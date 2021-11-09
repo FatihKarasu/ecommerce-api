@@ -17,19 +17,63 @@ namespace ecommerceApi.Controllers
         public ProductsController(ILogger<ProductsController> logger)
         {
             _logger = logger;
+            if (productsList.Count() == 0)
+            {
+                GenerateProducts();
+                GenerateProductColors();
+                GenerateProductSizes();
+            }
+
+
         }
         [HttpGet]
-        public List<ProductComplete> Get([FromQuery(Name = "start")] int start, [FromQuery(Name = "end")] int end, [FromQuery(Name = "orderBy")] string orderBy,
+        public List<ProductComplete> Get([FromQuery(Name = "query")] string query, [FromQuery(Name = "categoryId")] string categoryId, [FromQuery(Name = "start")] int start, [FromQuery(Name = "end")] int end, [FromQuery(Name = "orderBy")] string orderBy,
         [FromQuery(Name = "color")] List<string> colorIds,
         [FromQuery(Name = "size")] List<string> sizeIds,
         [FromQuery(Name = "min")] int min,
         [FromQuery(Name = "max")] int max)
         {
             List<Product> products = productsList;
+            List<string> subCategories = new List<string>();
+            if (query!=null && query.Length >= 3)
+            {
+                products = (from p in products
+                            where p.ProductTitle.ToLower().Contains(query.ToLower()) || p.ProductDetail.ToLower().Contains(query.ToLower())
+                            select p).Distinct().ToList();
+            }
+            if (categoryId != null)
+            {
+                for (int i = 0; i < Categories.Count(); i++)
+                {
+                    if (Categories[i].CategoryId == categoryId)
+                    {
+                        for (int x = 0; x < SubCategories.Count(); x++)
+                        {
+                            if (SubCategories[x].CategoryId == Categories[i].CategoryId)
+                            {
+                                subCategories.Add(SubCategories[x].SubCategoryId);
+                            }
+                        }
+                        break;
+                    }
+                }
+                if (subCategories.Count() != 0)
+                {
+                    products = (from p in products
+                                where subCategories.Contains(p.SubCategoryId)
+                                select p).Distinct().ToList();
+
+                }
+                else
+                {
+                    products = (from p in products
+                                where p.SubCategoryId == categoryId
+                                select p).Distinct().ToList();
+                }
+            }
 
             if (colorIds.Count() != 0)
             {
-
                 products = (from pc in ProductColors
                             join product in products
                             on pc.ProductId equals product.ProductId
@@ -97,8 +141,8 @@ namespace ecommerceApi.Controllers
                 }
 
             }
-            product.Colors=product.Colors.OrderBy(c => int.Parse(c.ColorId)).ToList();
-            product.Sizes=product.Sizes.OrderBy(s => int.Parse(s.SizeId)).ToList();
+            product.Colors = product.Colors.Distinct().OrderBy(c => int.Parse(c.ColorId)).ToList();
+            product.Sizes = product.Sizes.Distinct().OrderBy(s => int.Parse(s.SizeId)).ToList();
             return product;
         }
         public List<Product> OrderBy(List<Product> products, string orderBy, int start, int end)
@@ -161,85 +205,20 @@ namespace ecommerceApi.Controllers
                         }
                     }
                 }
-                productComplete.Colors=productComplete.Colors.OrderBy(c => int.Parse(c.ColorId)).ToList();
-                productComplete.Sizes=productComplete.Sizes.OrderBy(s => int.Parse(s.SizeId)).ToList();
+
+                productComplete.Colors = productComplete.Colors.Distinct().OrderBy(c => int.Parse(c.ColorId)).ToList();
+                productComplete.Sizes = productComplete.Sizes.Distinct().OrderBy(s => int.Parse(s.SizeId)).ToList();
                 productCompletes.Add(productComplete);
             }
             return productCompletes;
         }
-        public List<Product> productsList = new List<Product>(){
-            new Product(){ProductId="1",ProductTitle="Product 1 Title",ProductDetail="Product 1 Detail",ProductPrice="20",ProductImage="../Images/1.jpg"},
-            new Product(){ProductId="2",ProductTitle="Product 2 Title",ProductDetail="Product 2 Detail",ProductPrice="25",ProductImage="../Images/2.jpg"},
-            new Product(){ProductId="3",ProductTitle="Product 3 Title",ProductDetail="Product 3 Detail",ProductPrice="30",ProductImage="../Images/3.jpg"},
-            new Product(){ProductId="4",ProductTitle="Product 4 Title",ProductDetail="Product 4 Detail",ProductPrice="35",ProductImage="../Images/1.jpg"},
-            new Product(){ProductId="5",ProductTitle="Product 5 Title",ProductDetail="Product 5 Detail",ProductPrice="40",ProductImage="../Images/2.jpg"},
-            new Product(){ProductId="6",ProductTitle="Product 6 Title",ProductDetail="Product 6 Detail",ProductPrice="45",ProductImage="../Images/3.jpg"},
-            new Product(){ProductId="7",ProductTitle="Product 7 Title",ProductDetail="Product 7 Detail",ProductPrice="50",ProductImage="../Images/1.jpg"},
-            new Product(){ProductId="8",ProductTitle="Product 8 Title",ProductDetail="Product 8 Detail",ProductPrice="55",ProductImage="../Images/2.jpg"},
-            new Product(){ProductId="9",ProductTitle="Product 9 Title",ProductDetail="Product 9 Detail",ProductPrice="60",ProductImage="../Images/3.jpg"},
-            new Product(){ProductId="10",ProductTitle="Product 10 Title",ProductDetail="Product 10 Detail",ProductPrice="65",ProductImage="../Images/1.jpg"},
-            new Product(){ProductId="11",ProductTitle="Product 11 Title",ProductDetail="Product 11 Detail",ProductPrice="70",ProductImage="../Images/2.jpg"},
-            new Product(){ProductId="12",ProductTitle="Product 12 Title",ProductDetail="Product 12 Detail",ProductPrice="75",ProductImage="../Images/3.jpg"},
-            new Product(){ProductId="13",ProductTitle="Product 13 Title",ProductDetail="Product 13 Detail",ProductPrice="80",ProductImage="../Images/1.jpg"},
-            new Product(){ProductId="14",ProductTitle="Product 14 Title",ProductDetail="Product 14 Detail",ProductPrice="85",ProductImage="../Images/2.jpg"},
-            new Product(){ProductId="15",ProductTitle="Product 15 Title",ProductDetail="Product 15 Detail",ProductPrice="90",ProductImage="../Images/2.jpg"},
-            new Product(){ProductId="16",ProductTitle="Product 16 Title",ProductDetail="Product 16 Detail",ProductPrice="95",ProductImage="../Images/3.jpg"},
-            new Product(){ProductId="17",ProductTitle="Product 17 Title",ProductDetail="Product 17 Detail",ProductPrice="100",ProductImage="../Images/1.jpg"},
-            new Product(){ProductId="18",ProductTitle="Product 18 Title",ProductDetail="Product 18 Detail",ProductPrice="105",ProductImage="../Images/2.jpg"},
-            new Product(){ProductId="19",ProductTitle="Product 19 Title",ProductDetail="Product 19 Detail",ProductPrice="110",ProductImage="../Images/3.jpg"},
-            new Product(){ProductId="20",ProductTitle="Product 20 Title",ProductDetail="Product 20 Detail",ProductPrice="115",ProductImage="../Images/1.jpg"},
-            new Product(){ProductId="21",ProductTitle="Product 21 Title",ProductDetail="Product 21 Detail",ProductPrice="120",ProductImage="../Images/2.jpg"},
-            new Product(){ProductId="22",ProductTitle="Product 22 Title",ProductDetail="Product 22 Detail",ProductPrice="125",ProductImage="../Images/3.jpg"},
-            new Product(){ProductId="23",ProductTitle="Product 23 Title",ProductDetail="Product 23 Detail",ProductPrice="130",ProductImage="../Images/1.jpg"},
-            new Product(){ProductId="24",ProductTitle="Product 24 Title",ProductDetail="Product 24 Detail",ProductPrice="135",ProductImage="../Images/2.jpg"},
-        };
-        public static List<ProductColor> ProductColors = new List<ProductColor>(){
-            new ProductColor(){ProductColorId="1",ProductId="1",ColorId="1"},
-            new ProductColor(){ProductColorId="2",ProductId="2",ColorId="2"},
-            new ProductColor(){ProductColorId="3",ProductId="3",ColorId="3"},
-            new ProductColor(){ProductColorId="4",ProductId="4",ColorId="4"},
-            new ProductColor(){ProductColorId="5",ProductId="5",ColorId="5"},
-            new ProductColor(){ProductColorId="6",ProductId="6",ColorId="6"},
-            new ProductColor(){ProductColorId="7",ProductId="7",ColorId="1"},
-            new ProductColor(){ProductColorId="8",ProductId="8",ColorId="2"},
-            new ProductColor(){ProductColorId="9",ProductId="9",ColorId="3"},
-            new ProductColor(){ProductColorId="10",ProductId="10",ColorId="4"},
-            new ProductColor(){ProductColorId="11",ProductId="11",ColorId="5"},
-            new ProductColor(){ProductColorId="12",ProductId="12",ColorId="6"},
-            new ProductColor(){ProductColorId="13",ProductId="13",ColorId="1"},
-            new ProductColor(){ProductColorId="14",ProductId="14",ColorId="2"},
-            new ProductColor(){ProductColorId="15",ProductId="15",ColorId="3"},
-            new ProductColor(){ProductColorId="16",ProductId="16",ColorId="4"},
-            new ProductColor(){ProductColorId="17",ProductId="17",ColorId="5"},
-            new ProductColor(){ProductColorId="18",ProductId="18",ColorId="6"},
-            new ProductColor(){ProductColorId="19",ProductId="19",ColorId="1"},
-            new ProductColor(){ProductColorId="20",ProductId="20",ColorId="2"},
-            new ProductColor(){ProductColorId="21",ProductId="21",ColorId="3"},
-            new ProductColor(){ProductColorId="22",ProductId="22",ColorId="4"},
-            new ProductColor(){ProductColorId="23",ProductId="23",ColorId="5"},
-            new ProductColor(){ProductColorId="24",ProductId="1",ColorId="6"},
-            new ProductColor(){ProductColorId="25",ProductId="2",ColorId="1"},
-            new ProductColor(){ProductColorId="26",ProductId="3",ColorId="2"},
-            new ProductColor(){ProductColorId="27",ProductId="4",ColorId="3"},
-            new ProductColor(){ProductColorId="28",ProductId="5",ColorId="4"},
-            new ProductColor(){ProductColorId="29",ProductId="6",ColorId="5"},
-            new ProductColor(){ProductColorId="30",ProductId="7",ColorId="6"},
-            new ProductColor(){ProductColorId="31",ProductId="8",ColorId="1"},
-            new ProductColor(){ProductColorId="32",ProductId="9",ColorId="2"},
-            new ProductColor(){ProductColorId="33",ProductId="10",ColorId="3"},
-            new ProductColor(){ProductColorId="34",ProductId="11",ColorId="4"},
-            new ProductColor(){ProductColorId="35",ProductId="12",ColorId="5"},
-            new ProductColor(){ProductColorId="36",ProductId="13",ColorId="6"},
-            new ProductColor(){ProductColorId="37",ProductId="14",ColorId="1"},
-            new ProductColor(){ProductColorId="38",ProductId="15",ColorId="2"},
-            new ProductColor(){ProductColorId="39",ProductId="16",ColorId="3"},
-            new ProductColor(){ProductColorId="40",ProductId="17",ColorId="4"},
-            new ProductColor(){ProductColorId="41",ProductId="1",ColorId="3"},
-            new ProductColor(){ProductColorId="42",ProductId="1",ColorId="4"},
-            new ProductColor(){ProductColorId="43",ProductId="1",ColorId="5"},
-            new ProductColor(){ProductColorId="44",ProductId="1",ColorId="2"},
 
-        };
+
+        public static List<Product> productsList = new List<Product>();
+
+        public static List<ProductColor> ProductColors = new List<ProductColor>();
+        public static List<ProductSize> ProductSizes = new List<ProductSize>();
+
         public static List<Color> Colors = new List<Color>(){
             new Color(){ColorId="1",ColorValue="#ff0000",ColorName="Red"},
             new Color(){ColorId="2",ColorValue="#00ff00",ColorName="Green"},
@@ -249,52 +228,8 @@ namespace ecommerceApi.Controllers
             new Color(){ColorId="6",ColorValue="#00ffff",ColorName="Cyan"},
 
         };
-        public static List<ProductSize> ProductSizes = new List<ProductSize>(){
-            new ProductSize(){ProductSizeId="1",ProductId="1",SizeId="1"},
-            new ProductSize(){ProductSizeId="2",ProductId="2",SizeId="2"},
-            new ProductSize(){ProductSizeId="3",ProductId="3",SizeId="3"},
-            new ProductSize(){ProductSizeId="4",ProductId="4",SizeId="4"},
-            new ProductSize(){ProductSizeId="5",ProductId="5",SizeId="5"},
-            new ProductSize(){ProductSizeId="6",ProductId="6",SizeId="6"},
-            new ProductSize(){ProductSizeId="7",ProductId="7",SizeId="1"},
-            new ProductSize(){ProductSizeId="8",ProductId="8",SizeId="2"},
-            new ProductSize(){ProductSizeId="9",ProductId="9",SizeId="3"},
-            new ProductSize(){ProductSizeId="10",ProductId="10",SizeId="4"},
-            new ProductSize(){ProductSizeId="11",ProductId="11",SizeId="5"},
-            new ProductSize(){ProductSizeId="12",ProductId="12",SizeId="6"},
-            new ProductSize(){ProductSizeId="13",ProductId="13",SizeId="1"},
-            new ProductSize(){ProductSizeId="14",ProductId="14",SizeId="2"},
-            new ProductSize(){ProductSizeId="15",ProductId="15",SizeId="3"},
-            new ProductSize(){ProductSizeId="16",ProductId="16",SizeId="4"},
-            new ProductSize(){ProductSizeId="17",ProductId="17",SizeId="5"},
-            new ProductSize(){ProductSizeId="18",ProductId="18",SizeId="6"},
-            new ProductSize(){ProductSizeId="19",ProductId="19",SizeId="1"},
-            new ProductSize(){ProductSizeId="20",ProductId="20",SizeId="2"},
-            new ProductSize(){ProductSizeId="21",ProductId="21",SizeId="3"},
-            new ProductSize(){ProductSizeId="22",ProductId="22",SizeId="4"},
-            new ProductSize(){ProductSizeId="23",ProductId="23",SizeId="5"},
-            new ProductSize(){ProductSizeId="24",ProductId="1",SizeId="6"},
-            new ProductSize(){ProductSizeId="25",ProductId="2",SizeId="1"},
-            new ProductSize(){ProductSizeId="26",ProductId="3",SizeId="2"},
-            new ProductSize(){ProductSizeId="27",ProductId="4",SizeId="3"},
-            new ProductSize(){ProductSizeId="28",ProductId="5",SizeId="4"},
-            new ProductSize(){ProductSizeId="29",ProductId="6",SizeId="5"},
-            new ProductSize(){ProductSizeId="30",ProductId="7",SizeId="6"},
-            new ProductSize(){ProductSizeId="31",ProductId="8",SizeId="1"},
-            new ProductSize(){ProductSizeId="32",ProductId="9",SizeId="2"},
-            new ProductSize(){ProductSizeId="33",ProductId="10",SizeId="3"},
-            new ProductSize(){ProductSizeId="34",ProductId="11",SizeId="4"},
-            new ProductSize(){ProductSizeId="35",ProductId="12",SizeId="5"},
-            new ProductSize(){ProductSizeId="36",ProductId="13",SizeId="6"},
-            new ProductSize(){ProductSizeId="37",ProductId="14",SizeId="1"},
-            new ProductSize(){ProductSizeId="38",ProductId="15",SizeId="2"},
-            new ProductSize(){ProductSizeId="39",ProductId="16",SizeId="3"},
-            new ProductSize(){ProductSizeId="40",ProductId="17",SizeId="4"},
-            new ProductSize(){ProductSizeId="41",ProductId="1",SizeId="3"},
-            new ProductSize(){ProductSizeId="42",ProductId="1",SizeId="4"},
-            new ProductSize(){ProductSizeId="43",ProductId="1",SizeId="5"},
-            new ProductSize(){ProductSizeId="44",ProductId="1",SizeId="2"},
-        };
+
+
         public static List<Size> Sizes = new List<Size>(){
             new Size(){SizeId="1",SizeName="xs"},
             new Size(){SizeId="2",SizeName="s"},
@@ -304,5 +239,82 @@ namespace ecommerceApi.Controllers
             new Size(){SizeId="6",SizeName="xxl"},
 
         };
+        public static List<Category> Categories = new List<Category>(){
+            new Category(){CategoryId="women",CategoryName="Women",CategoryImage1="../Images/1.jpg",CategoryImage2="../Images/2.jpg"},
+            new Category(){CategoryId="men",CategoryName="Men",CategoryImage1="../Images/3.jpg",CategoryImage2="../Images/1.jpg"},
+            new Category(){CategoryId="kids",CategoryName="Kids",CategoryImage1="../Images/2.jpg",CategoryImage2="../Images/3.jpg"},
+            new Category(){CategoryId="baby",CategoryName="Baby",CategoryImage1="../Images/3.jpg",CategoryImage2="../Images/2.jpg"},
+        };
+        public static List<SubCategory> SubCategories = new List<SubCategory>(){
+            new SubCategory(){CategoryId="women",SubCategoryName="Women Sub",SubCategoryId="women-sub",SubCategoryImage1="../Images/1.jpg",SubCategoryImage2="../Images/2.jpg"},
+            new SubCategory(){CategoryId="women",SubCategoryName="Women Sub2",SubCategoryId="women-sub2",SubCategoryImage1="../Images/2.jpg",SubCategoryImage2="../Images/3.jpg"},
+            new SubCategory(){CategoryId="women",SubCategoryName="Women Sub3",SubCategoryId="women-sub3",SubCategoryImage1="../Images/3.jpg",SubCategoryImage2="../Images/1.jpg"},
+            new SubCategory(){CategoryId="women",SubCategoryName="Women Sub4",SubCategoryId="women-sub4",SubCategoryImage1="../Images/3.jpg",SubCategoryImage2="../Images/2.jpg"},
+            new SubCategory(){CategoryId="men",SubCategoryName="Men Sub",SubCategoryId="men-sub",SubCategoryImage1="../Images/1.jpg",SubCategoryImage2="../Images/2.jpg"},
+            new SubCategory(){CategoryId="men",SubCategoryName="Men Sub2",SubCategoryId="men-sub2",SubCategoryImage1="../Images/3.jpg",SubCategoryImage2="../Images/1.jpg"},
+            new SubCategory(){CategoryId="men",SubCategoryName="Men Sub3",SubCategoryId="men-sub3",SubCategoryImage1="../Images/2.jpg",SubCategoryImage2="../Images/3.jpg"},
+            new SubCategory(){CategoryId="men",SubCategoryName="Men Sub4",SubCategoryId="men-sub4",SubCategoryImage1="../Images/1.jpg",SubCategoryImage2="../Images/3.jpg"},
+            new SubCategory(){CategoryId="kids",SubCategoryName="Kids Sub",SubCategoryId="kids-sub",SubCategoryImage1="../Images/2.jpg",SubCategoryImage2="../Images/1.jpg"},
+            new SubCategory(){CategoryId="kids",SubCategoryName="Kids Sub2",SubCategoryId="kids-sub2",SubCategoryImage1="../Images/1.jpg",SubCategoryImage2="../Images/2.jpg"},
+            new SubCategory(){CategoryId="kids",SubCategoryName="Kids Sub3",SubCategoryId="kids-sub3",SubCategoryImage1="../Images/3.jpg",SubCategoryImage2="../Images/1.jpg"},
+            new SubCategory(){CategoryId="kids",SubCategoryName="Kids Sub4",SubCategoryId="kids-sub4",SubCategoryImage1="../Images/2.jpg",SubCategoryImage2="../Images/3.jpg"},
+            new SubCategory(){CategoryId="baby",SubCategoryName="Baby Sub",SubCategoryId="baby-sub",SubCategoryImage1="../Images/1.jpg",SubCategoryImage2="../Images/2.jpg"},
+            new SubCategory(){CategoryId="baby",SubCategoryName="Baby Sub2",SubCategoryId="baby-sub2",SubCategoryImage1="../Images/3.jpg",SubCategoryImage2="../Images/1.jpg"},
+            new SubCategory(){CategoryId="baby",SubCategoryName="Baby Sub3",SubCategoryId="baby-sub3",SubCategoryImage1="../Images/2.jpg",SubCategoryImage2="../Images/3.jpg"},
+            new SubCategory(){CategoryId="baby",SubCategoryName="Baby Sub4",SubCategoryId="baby-sub4",SubCategoryImage1="../Images/1.jpg",SubCategoryImage2="../Images/2.jpg"},
+
+        };
+
+        public int GenerateProducts()
+        {
+            Random random = new Random();
+            for (int i = 1; i < 200; i++)
+            {
+                string price=random.Next(20, 600).ToString();
+                string salePrice =null;
+                if(random.Next(1, 7)==6)
+                {
+                    salePrice=random.Next(20, int.Parse(price)).ToString();
+                }
+                Product product = new Product() 
+                { ProductId = i.ToString(), 
+                SubCategoryId = subCategories[random.Next(0, 16)], 
+                ProductTitle = ("Product " + i.ToString() + " Title"), 
+                ProductDetail = "Product " + i.ToString() + " Detail", 
+                ProductPrice = price,
+                ProductSalePrice=salePrice, 
+                ProductImage = images[random.Next(0, 3)] };
+                productsList.Add(product);
+            }
+            return 0;
+        }
+        public int GenerateProductColors()
+        {
+            Random random = new Random();
+            for (int i = 0; i < 600; i++)
+            {
+                ProductColor productColor = new ProductColor() { ProductColorId = i.ToString(), ProductId = random.Next(1, 200).ToString(), ColorId = random.Next(1, 6).ToString() };
+                ProductColors.Add(productColor);
+            }
+            return 0;
+        }
+        public int GenerateProductSizes()
+        {
+            Random random = new Random();
+            for (int i = 0; i < 600; i++)
+            {
+                ProductSize productSize = new ProductSize() { ProductSizeId = i.ToString(), ProductId = random.Next(1, 200).ToString(), SizeId = random.Next(1, 6).ToString() };
+                ProductSizes.Add(productSize);
+            }
+            return 0;
+        }
+        public static string[] subCategories = new string[] {
+         "women-sub", "women-sub2", "women-sub3", "women-sub4"
+        , "men-sub", "men-sub2", "men-sub3", "men-sub4"
+        , "kids-sub", "kids-sub2", "kids-sub3", "kids-sub4"
+        , "baby-sub", "baby-sub2", "baby-sub3", "baby-sub4" };
+
+        public static string[] images = new string[] { "../Images/1.jpg", "../Images/2.jpg", "../Images/3.jpg" };
+
     }
 }

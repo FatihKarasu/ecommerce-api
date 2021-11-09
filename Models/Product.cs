@@ -6,11 +6,15 @@ namespace ecommerceApi
     {
         public string ProductId { get; set; }
 
+        public string SubCategoryId { get; set; }
+
         public string ProductTitle { get; set; }
 
         public string ProductDetail { get; set; }
         
         public string ProductPrice { get; set; }
+
+        public string ProductSalePrice { get; set; }
 
         public string ProductImage { get; set; }
     }

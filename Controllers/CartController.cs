@@ -26,17 +26,16 @@ namespace ecommerceApi.Controllers
 
             return cartItemList;
         }
-
         [HttpGet("user/{userId}")]
         public List<CartComplete> GetById(string userId)
         {
             List<CartComplete> items = new List<CartComplete>();
-
+            
             foreach (CartItem item in cartItemList)
             {
                 if (item.UserId == userId)
                 {
-                    foreach (Product product in productsList)
+                    foreach (Product product in ProductsController.productsList)
                     {
                         if (item.ProductId == product.ProductId)
                         {
@@ -80,7 +79,7 @@ namespace ecommerceApi.Controllers
             CartComplete complete = new CartComplete();
             foreach (CartItem cartItem in cartItemList)
             {
-                if (cartItem.UserId == item.UserId && cartItem.ProductId == item.ProductId)
+                if (cartItem.UserId == item.UserId && cartItem.ProductId == item.ProductId && cartItem.ColorId==item.ColorId && cartItem.SizeId== item.SizeId )
                 {
                     item.CartItemId = cartItem.CartItemId;
                     item.Amount += cartItem.Amount;
@@ -100,7 +99,7 @@ namespace ecommerceApi.Controllers
                 }
                 cartItemList.Add(item);
             }
-            foreach (Product product in productsList)
+            foreach (Product product in ProductsController.productsList)
             {
                 if (item.ProductId == product.ProductId)
                 {
@@ -204,7 +203,7 @@ namespace ecommerceApi.Controllers
             new Product(){ProductId="23",ProductTitle="Product 23 Title",ProductDetail="Product 23 Detail",ProductPrice="130",ProductImage="../Images/1.jpg"},
             new Product(){ProductId="24",ProductTitle="Product 24 Title",ProductDetail="Product 24 Detail",ProductPrice="135",ProductImage="../Images/2.jpg"},
         };
-
+        
         public static List<Color> Colors = new List<Color>(){
             new Color(){ColorId="1",ColorValue="#ff0000",ColorName="Red"},
             new Color(){ColorId="2",ColorValue="#00ff00",ColorName="Green"},
