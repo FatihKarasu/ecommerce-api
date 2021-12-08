@@ -9,5 +9,9 @@ namespace ecommerceApi
         public List<Color> Colors { get; set; }
 
         public List<Size> Sizes { get; set; }
+
+        public string Rating{get;set;}
+
+        public int ReviewCount{get;set;}
     }
 }

@@ -23,11 +23,19 @@ namespace ecommerceApi.Controllers
                 GenerateProductColors();
                 GenerateProductSizes();
             }
+            if (ReviewController.reviewList.Count() == 0)
+            {
+                ReviewController.GenerateReviews();
+            }
+            if (CampaignController.campaignProducts.Count() == 0)
+            {
+                CampaignController.GenerateCampaignProducts();
+            }
 
 
         }
         [HttpGet]
-        public List<ProductComplete> Get([FromQuery(Name = "query")] string query, [FromQuery(Name = "categoryId")] string categoryId, [FromQuery(Name = "start")] int start, [FromQuery(Name = "end")] int end, [FromQuery(Name = "orderBy")] string orderBy,
+        public List<ProductComplete> Get([FromQuery(Name = "campaignId")] string campaignId, [FromQuery(Name = "query")] string query, [FromQuery(Name = "categoryId")] string categoryId, [FromQuery(Name = "start")] int start, [FromQuery(Name = "end")] int end, [FromQuery(Name = "orderBy")] string orderBy,
         [FromQuery(Name = "color")] List<string> colorIds,
         [FromQuery(Name = "size")] List<string> sizeIds,
         [FromQuery(Name = "min")] int min,
@@ -35,11 +43,15 @@ namespace ecommerceApi.Controllers
         {
             List<Product> products = productsList;
             List<string> subCategories = new List<string>();
-            if (query!=null && query.Length >= 3)
+            if (query != null && query.Length >= 3)
             {
                 products = (from p in products
                             where p.ProductTitle.ToLower().Contains(query.ToLower()) || p.ProductDetail.ToLower().Contains(query.ToLower())
                             select p).Distinct().ToList();
+            }
+            else if (campaignId != null)
+            {
+                products = (from cp in CampaignController.campaignProducts join p in products on cp.ProductId equals p.ProductId where cp.CampaignId == campaignId select p).Distinct().ToList();
             }
             if (categoryId != null)
             {
@@ -111,6 +123,8 @@ namespace ecommerceApi.Controllers
             {
                 if (p.ProductId == id)
                 {
+                    var reviewCount = 0;
+                    var rating = 0;
                     product.Product = p;
                     foreach (ProductColor pc in ProductColors)
                     {
@@ -138,6 +152,20 @@ namespace ecommerceApi.Controllers
                             }
                         }
                     }
+                    foreach (Review review in ReviewController.reviewList)
+                    {
+                        if (p.ProductId == review.ProductId)
+                        {
+                            rating += Int32.Parse(review.Rating);
+                            reviewCount += 1;
+                        }
+                    }
+                    if (reviewCount > 0)
+                    {
+                        product.ReviewCount = reviewCount;
+                        product.Rating = Math.Round(((double)rating / (double)reviewCount), 1).ToString();
+                    }
+
                 }
 
             }
@@ -270,20 +298,27 @@ namespace ecommerceApi.Controllers
             Random random = new Random();
             for (int i = 1; i < 200; i++)
             {
-                string price=random.Next(20, 600).ToString();
-                string salePrice =null;
-                if(random.Next(1, 7)==6)
+                string oldPrice = random.Next(20, 600).ToString();
+                string price = null;
+                if (random.Next(1, 7) == 6)
                 {
-                    salePrice=random.Next(20, int.Parse(price)).ToString();
+                    price = random.Next(20, int.Parse(oldPrice)).ToString();
                 }
-                Product product = new Product() 
-                { ProductId = i.ToString(), 
-                SubCategoryId = subCategories[random.Next(0, 16)], 
-                ProductTitle = ("Product " + i.ToString() + " Title"), 
-                ProductDetail = "Product " + i.ToString() + " Detail", 
-                ProductPrice = price,
-                ProductSalePrice=salePrice, 
-                ProductImage = images[random.Next(0, 3)] };
+                if (price == null)
+                {
+                    price = oldPrice;
+                    oldPrice = null;
+                }
+                Product product = new Product()
+                {
+                    ProductId = i.ToString(),
+                    SubCategoryId = subCategories[random.Next(0, 16)],
+                    ProductTitle = ("Product " + i.ToString() + " Title"),
+                    ProductDetail = "Product " + i.ToString() + " Detail",
+                    ProductPrice = price,
+                    ProductOldPrice = oldPrice,
+                    ProductImage = images[random.Next(0, 3)]
+                };
                 productsList.Add(product);
             }
             return 0;
@@ -291,9 +326,9 @@ namespace ecommerceApi.Controllers
         public int GenerateProductColors()
         {
             Random random = new Random();
-            for (int i = 0; i < 600; i++)
+            for (int i = 1; i < 600; i++)
             {
-                ProductColor productColor = new ProductColor() { ProductColorId = i.ToString(), ProductId = random.Next(1, 200).ToString(), ColorId = random.Next(1, 6).ToString() };
+                ProductColor productColor = new ProductColor() { ProductColorId = i.ToString(), ProductId = random.Next(1, 200).ToString(), ColorId = random.Next(1, 7).ToString() };
                 ProductColors.Add(productColor);
             }
             return 0;
@@ -301,9 +336,9 @@ namespace ecommerceApi.Controllers
         public int GenerateProductSizes()
         {
             Random random = new Random();
-            for (int i = 0; i < 600; i++)
+            for (int i = 1; i < 600; i++)
             {
-                ProductSize productSize = new ProductSize() { ProductSizeId = i.ToString(), ProductId = random.Next(1, 200).ToString(), SizeId = random.Next(1, 6).ToString() };
+                ProductSize productSize = new ProductSize() { ProductSizeId = i.ToString(), ProductId = random.Next(1, 200).ToString(), SizeId = random.Next(1, 7).ToString() };
                 ProductSizes.Add(productSize);
             }
             return 0;

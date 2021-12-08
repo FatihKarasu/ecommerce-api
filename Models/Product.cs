@@ -14,7 +14,7 @@ namespace ecommerceApi
         
         public string ProductPrice { get; set; }
 
-        public string ProductSalePrice { get; set; }
+        public string ProductOldPrice { get; set; }
 
         public string ProductImage { get; set; }
     }
