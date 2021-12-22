@@ -12,7 +12,7 @@ namespace ecommerceApi.Controllers
     [Route("[controller]")]
     public class OrderController : ControllerBase
     {
-    
+
         private readonly ILogger<OrderController> _logger;
 
         public OrderController(ILogger<OrderController> logger)
@@ -24,51 +24,107 @@ namespace ecommerceApi.Controllers
         [HttpGet("{orderId}")]
         public Order Get(string orderId)
         {
-            Order _order=new Order();
+            Order _order = new Order();
 
             foreach (Order order in orderList)
             {
-                if(order.OrderId==orderId)
+                if (order.OrderId == orderId)
                 {
-                    _order=order;
+                    _order = order;
                 }
-                
+
             }
-            
+
             return _order;
         }
-        [Authorize]
         [HttpGet("user/{userId}")]
-        public List<Order> GetById(string userId)
+        public List<OrderComplete> GetById(string userId)
         {
-            List<Order> orders=new List<Order>();
+            List<OrderComplete> orders = new List<OrderComplete>();
 
             foreach (Order order in orderList)
             {
-                if(order.UserId==userId)
+
+                if (order.UserId == userId)
                 {
-                    orders.Add(order);
+                    OrderComplete orderComplete = new OrderComplete();
+                    orderComplete.OrderProducts = new List<OrderProduct>();
+
+                    foreach (OrderProduct op in orderProducts)
+                    {
+                        if (op.OrderId == order.OrderId)
+                        {
+                            orderComplete.OrderProducts.Add(op);
+                        }
+                    }
+                    orderComplete.Order = order;
+                    orders.Add(orderComplete);
                 }
-                
+
             }
-            
+
             return orders;
         }
+       
         [Authorize]
-        [HttpPost("addorder")]
-        public Response AddAddress([FromForm] Order order)
+        [HttpPost]
+        public Order AddOrder([FromForm] Order order)
         {
-            Response response = new Response();
-            //Get the last item's ID and add 1.
-            order.OrderId=(orderList.Count()+1).ToString();
+            order.OrderId = (orderList.Count + 1).ToString();
+            order.OrderStatus = "Pending";
+            order.PaymentMethod = "Credit Card";
+            order.OrderDate = DateTime.Now.ToString();
+            List<CartItem> cartItems =new List<CartItem>();
+
+            foreach (CartItem cartItem in CartController.cartItemList)
+            {
+                if (cartItem.UserId == order.UserId)
+                {
+                    foreach (Product product in ProductsController.productsList)
+                    {
+                        if (product.ProductId == cartItem.ProductId)
+                        {
+                            OrderProduct orderProduct = new OrderProduct();
+                            orderProduct.Product = new Product();
+                            orderProduct.OrderProductId = (orderProducts.Count + 1).ToString();
+                            orderProduct.OrderId = order.OrderId;
+                            orderProduct.Product = product;
+                            foreach (Color color in ProductsController.Colors)
+                            {
+                                if (color.ColorId == cartItem.ColorId)
+                                {
+                                    orderProduct.ProductColor = color;
+                                    break;
+                                }
+                            }
+                            foreach (Size size in ProductsController.Sizes)
+                            {
+                                if (size.SizeId == cartItem.SizeId)
+                                {
+                                    orderProduct.ProductSize = size;
+                                    break;
+                                }
+                            }
+                            orderProduct.Amount = cartItem.Amount;
+                            orderProducts.Add(orderProduct);
+                            break;
+                        }
+
+                    }
+                   cartItems.Add(cartItem);
+                }
+
+            }
+            foreach (CartItem item in cartItems)
+            {
+                CartController.cartItemList.Remove(item);
+            }
             orderList.Add(order);
-            return response;
+            return order;
         }
-        
-         public List<Order> orderList = new List<Order>(){
-            new Order(){OrderId="1",UserId="1",ProductId="1",ProductTitle="Product 1 Title",ProductDetail="Product 1 Detail",ProductPrice="123",ProductImage="../Images/1.jpg",OrderDate="Order Date",OrderStatus="Delivered"},
-            new Order(){OrderId="2",UserId="1",ProductId="2",ProductTitle="Product 2 Title",ProductDetail="Product 2 Detail",ProductPrice="1234",ProductImage="../Images/2.jpg",OrderDate="Order Date",OrderStatus="Pending"},
-            new Order(){OrderId="3",UserId="1",ProductId="3",ProductTitle="Product 3 Title",ProductDetail="Product 3 Detail",ProductPrice="12345",ProductImage="../Images/3.jpg",OrderDate="Order Date",OrderStatus="Cancelled"},
-           };
+
+        public static List<Order> orderList = new List<Order>() { };
+
+        public static List<OrderProduct> orderProducts = new List<OrderProduct>() { };
     }
 }

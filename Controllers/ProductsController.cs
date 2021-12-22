@@ -154,7 +154,7 @@ namespace ecommerceApi.Controllers
                     }
                     foreach (Review review in ReviewController.reviewList)
                     {
-                        if (p.ProductId == review.ProductId)
+                        if (p.ProductId == review.ProductId && review.IsDeleted==false)
                         {
                             rating += Int32.Parse(review.Rating);
                             reviewCount += 1;
@@ -293,7 +293,7 @@ namespace ecommerceApi.Controllers
 
         };
 
-        public int GenerateProducts()
+        public static int GenerateProducts()
         {
             Random random = new Random();
             for (int i = 1; i < 200; i++)
@@ -323,7 +323,7 @@ namespace ecommerceApi.Controllers
             }
             return 0;
         }
-        public int GenerateProductColors()
+        public static int GenerateProductColors()
         {
             Random random = new Random();
             for (int i = 1; i < 600; i++)
@@ -333,7 +333,7 @@ namespace ecommerceApi.Controllers
             }
             return 0;
         }
-        public int GenerateProductSizes()
+        public static int GenerateProductSizes()
         {
             Random random = new Random();
             for (int i = 1; i < 600; i++)

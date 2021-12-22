@@ -1,25 +1,27 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\dony\\Desktop\\E-Commerce\\ecommerce-api\\ecommerceApi.csproj": {}
+    "C:\\Users\\fatih\\Desktop\\E-Commerce\\ecommerce-api\\ecommerceApi.csproj": {}
   },
   "projects": {
-    "C:\\Users\\dony\\Desktop\\E-Commerce\\ecommerce-api\\ecommerceApi.csproj": {
+    "C:\\Users\\fatih\\Desktop\\E-Commerce\\ecommerce-api\\ecommerceApi.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\dony\\Desktop\\E-Commerce\\ecommerce-api\\ecommerceApi.csproj",
+        "projectUniqueName": "C:\\Users\\fatih\\Desktop\\E-Commerce\\ecommerce-api\\ecommerceApi.csproj",
         "projectName": "ecommerceApi",
-        "projectPath": "C:\\Users\\dony\\Desktop\\E-Commerce\\ecommerce-api\\ecommerceApi.csproj",
-        "packagesPath": "C:\\Users\\dony\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\dony\\Desktop\\E-Commerce\\ecommerce-api\\obj\\",
+        "projectPath": "C:\\Users\\fatih\\Desktop\\E-Commerce\\ecommerce-api\\ecommerceApi.csproj",
+        "packagesPath": "C:\\Users\\fatih\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\fatih\\Desktop\\E-Commerce\\ecommerce-api\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\dony\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\fatih\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "net5.0"
         ],
         "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -65,7 +67,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.101\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.401\\RuntimeIdentifierGraph.json"
         }
       }
     }
