@@ -63,7 +63,7 @@ namespace ecommerceApi.Controllers
 
             }
 
-            return orders;
+            return orders.OrderByDescending(o=>int.Parse(o.Order.OrderId)).ToList();
         }
        
         [Authorize]
